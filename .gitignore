@@ -13,3 +13,11 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .DS_Store
+.env
+.env.local
+.env*.local
+node_modules
+.next
+.DS_Store
+*.db
+prisma/dev.db

@@ -10,7 +10,11 @@ import {
   setAdminSession
 } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { loginSchema, statusSchema } from "@/lib/validation";
+import {
+  loginSchema,
+  submissionDetailsSchema,
+  submissionQuickEditSchema
+} from "@/lib/validation";
 
 export type LoginActionState = {
   success: boolean;
@@ -18,13 +22,20 @@ export type LoginActionState = {
   fieldErrors?: Record<string, string | undefined>;
 };
 
-export type StatusActionState = {
+export type SubmissionEditActionState = {
   success: boolean;
   message: string;
+  fieldErrors?: Record<string, string | undefined>;
 };
 
 function formDataToObject(formData: FormData) {
   return Object.fromEntries(formData.entries());
+}
+
+function fieldErrorsFrom<T extends Record<string, string[] | undefined>>(fieldErrors: T) {
+  return Object.fromEntries(
+    Object.entries(fieldErrors).map(([key, messages]) => [key, messages?.[0]])
+  );
 }
 
 export async function loginAdmin(
@@ -68,26 +79,32 @@ export async function logoutAdmin() {
   redirect("/admin/login");
 }
 
-export async function updateSubmissionStatus(
+export async function updateSubmissionQuickEdit(
   id: string,
-  _state: StatusActionState,
+  _state: SubmissionEditActionState,
   formData: FormData
-): Promise<StatusActionState> {
+): Promise<SubmissionEditActionState> {
   await requireAdmin();
 
-  const parsed = statusSchema.safeParse(formDataToObject(formData));
+  const parsed = submissionQuickEditSchema.safeParse(formDataToObject(formData));
 
   if (!parsed.success) {
+    const { fieldErrors } = parsed.error.flatten();
+
     return {
       success: false,
-      message: "Изберете валиден статус."
+      message: "Изберете валиден тип и статус.",
+      fieldErrors: fieldErrorsFrom(fieldErrors)
     };
   }
 
   try {
     await prisma.submission.update({
       where: { id },
-      data: { status: parsed.data.status }
+      data: {
+        type: parsed.data.type,
+        status: parsed.data.status
+      }
     });
 
     revalidatePath("/admin/dashboard");
@@ -95,84 +112,88 @@ export async function updateSubmissionStatus(
 
     return {
       success: true,
-      message: "Статусот е успешно ажуриран."
+      message: "Промените се успешно зачувани."
     };
   } catch (error) {
     console.error(error);
 
     return {
       success: false,
-      message: "Не може да се ажурира статусот. Обидете се повторно."
+      message: "Промените не може да се зачуваат. Обидете се повторно."
     };
   }
 }
 
-function redirectWithDashboardNotice(notice: "trash" | "restored" | "deleted", view: "active" | "trash") {
+export async function updateSubmissionDetails(
+  id: string,
+  _state: SubmissionEditActionState,
+  formData: FormData
+): Promise<SubmissionEditActionState> {
+  await requireAdmin();
+
+  const parsed = submissionDetailsSchema.safeParse(formDataToObject(formData));
+
+  if (!parsed.success) {
+    const { fieldErrors } = parsed.error.flatten();
+
+    return {
+      success: false,
+      message: "Проверете ги внесените податоци.",
+      fieldErrors: fieldErrorsFrom(fieldErrors)
+    };
+  }
+
+  try {
+    await prisma.submission.update({
+      where: { id },
+      data: {
+        type: parsed.data.type,
+        status: parsed.data.status,
+        fullName: parsed.data.fullName,
+        email: parsed.data.email,
+        phone: parsed.data.phone ?? null,
+        subject: parsed.data.subject ?? null,
+        location: parsed.data.location ?? null,
+        category: parsed.data.category ?? null,
+        message: parsed.data.message,
+        createdAt: new Date(parsed.data.createdAt)
+      }
+    });
+
+    revalidatePath("/admin/dashboard");
+    revalidatePath(`/admin/submissions/${id}`);
+
+    return {
+      success: true,
+      message: "Промените се успешно зачувани."
+    };
+  } catch (error) {
+    console.error(error);
+
+    return {
+      success: false,
+      message: "Промените не може да се зачуваат. Обидете се повторно."
+    };
+  }
+}
+
+function redirectWithDashboardNotice(notice: "deleted") {
   const params = new URLSearchParams({
     notice
   });
 
-  if (view === "trash") {
-    params.set("view", "trash");
-  }
-
   redirect(`/admin/dashboard?${params.toString()}`);
 }
 
-export async function moveToTrash(id: string) {
-  await requireAdmin();
-
-  await prisma.submission.updateMany({
-    where: {
-      id,
-      deletedAt: null
-    },
-    data: {
-      deletedAt: new Date()
-    }
-  });
-
-  revalidatePath("/admin/dashboard");
-  revalidatePath(`/admin/submissions/${id}`);
-
-  redirectWithDashboardNotice("trash", "active");
-}
-
-export async function restoreSubmission(id: string) {
-  await requireAdmin();
-
-  await prisma.submission.updateMany({
-    where: {
-      id,
-      deletedAt: {
-        not: null
-      }
-    },
-    data: {
-      deletedAt: null
-    }
-  });
-
-  revalidatePath("/admin/dashboard");
-  revalidatePath(`/admin/submissions/${id}`);
-
-  redirectWithDashboardNotice("restored", "trash");
-}
-
-export async function permanentlyDeleteSubmission(id: string) {
+export async function deleteSubmission(id: string) {
   await requireAdmin();
 
   await prisma.submission.deleteMany({
-    where: {
-      id,
-      deletedAt: {
-        not: null
-      }
-    }
+    where: { id }
   });
 
   revalidatePath("/admin/dashboard");
   revalidatePath(`/admin/submissions/${id}`);
 
-  redirectWithDashboardNotice("deleted", "trash");
+  redirectWithDashboardNotice("deleted");
 }

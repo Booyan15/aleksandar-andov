@@ -11,17 +11,20 @@ const config: Config = {
       colors: {
         municipal: {
           red: "#B91C1C",
-          dark: "#7F1D1D",
+          darkRed: "#991B1B",
           yellow: "#FACC15",
           gold: "#EAB308",
-          warm: "#FFF7ED",
-          cream: "#FFFBF5",
+          warm: "#FAFAF7",
+          cream: "#FFFFFF",
+          dark: "#1F2937",
+          muted: "#6B7280",
           text: "#1F2937",
-          line: "#F1D2C3"
+          line: "#E5E7EB"
         }
       },
       boxShadow: {
-        official: "0 18px 55px rgba(127, 29, 29, 0.10)"
+        official: "0 18px 45px rgba(31, 41, 55, 0.08)",
+        card: "0 12px 28px rgba(31, 41, 55, 0.06)"
       }
     }
   },

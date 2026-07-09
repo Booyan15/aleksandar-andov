@@ -45,8 +45,30 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Внесете лозинка.")
 });
 
-export const statusSchema = z.object({
+export const submissionQuickEditSchema = z.object({
+  type: z.enum(["QUESTION", "PROBLEM"], {
+    required_error: "Изберете тип."
+  }),
   status: z.enum(["NEW", "IN_PROGRESS", "RESOLVED", "ARCHIVED"], {
     required_error: "Изберете статус."
   })
+});
+
+const validDate = z
+  .string({
+    required_error: "Внесете датум на поднесување."
+  })
+  .trim()
+  .min(1, "Внесете датум на поднесување.")
+  .refine((value) => !Number.isNaN(new Date(value).getTime()), "Внесете валиден датум.");
+
+export const submissionDetailsSchema = submissionQuickEditSchema.extend({
+  fullName: requiredText("Името и презимето се задолжителни."),
+  email: z.string().trim().email("Внесете валидна е-пошта адреса."),
+  phone: optionalText,
+  subject: optionalText,
+  location: optionalText,
+  category: optionalText,
+  message: requiredText("Пораката е задолжителна.", 1),
+  createdAt: validDate
 });

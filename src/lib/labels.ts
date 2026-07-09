@@ -2,7 +2,7 @@ import type { SubmissionStatus, SubmissionType } from "@prisma/client";
 
 export const submissionTypeLabels: Record<SubmissionType, string> = {
   QUESTION: "Прашање",
-  PROBLEM: "Пријава"
+  PROBLEM: "Пријава на проблем"
 };
 
 export const submissionStatusLabels: Record<SubmissionStatus, string> = {

@@ -14,7 +14,7 @@ export function LoginForm() {
   return (
     <form action={formAction} className="space-y-5" noValidate>
       {state.message ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800" role="status">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800" role="status">
           {state.message}
         </div>
       ) : null}
@@ -28,7 +28,7 @@ export function LoginForm() {
           name="email"
           type="email"
           autoComplete="email"
-          className="field-input"
+          className={`field-input ${state.fieldErrors?.email ? "field-input-invalid" : ""}`}
           placeholder="admin@kocani.gov.mk"
           aria-invalid={Boolean(state.fieldErrors?.email)}
         />
@@ -44,7 +44,7 @@ export function LoginForm() {
           name="password"
           type="password"
           autoComplete="current-password"
-          className="field-input"
+          className={`field-input ${state.fieldErrors?.password ? "field-input-invalid" : ""}`}
           placeholder="Внесете лозинка"
           aria-invalid={Boolean(state.fieldErrors?.password)}
         />
@@ -53,7 +53,7 @@ export function LoginForm() {
 
       <button
         type="submit"
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-municipal-yellow px-5 py-3 text-sm font-semibold text-municipal-dark shadow-sm transition hover:bg-municipal-gold focus:outline-none focus:ring-4 focus:ring-municipal-gold/30 disabled:cursor-not-allowed disabled:opacity-60"
+        className="primary-button w-full"
         disabled={pending}
       >
         {pending ? "Се најавувате..." : "Најави се"}
