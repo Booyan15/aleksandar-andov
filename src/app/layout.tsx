@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const title = "Претседател на Советот на Општина Кочани";
+const description =
+  "Официјална веб-платформа за комуникација со претседателот на Советот на Општина Кочани. Поставете прашање, доставете предлог или пријавете проблем од јавен интерес.";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kocani.gov.mk";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Претседател на Советот на Општина Кочани",
+    default: title,
     template: "%s | Совет на Општина Кочани"
   },
-  description:
-    "Официјална веб-платформа за комуникација со претседателот на Советот на Општина Кочани. Поставете прашање, доставете предлог или пријавете проблем од јавен интерес.",
+  description,
   keywords: [
     "Претседател на Советот на Општина Кочани",
     "Совет на Општина Кочани",
@@ -21,6 +23,30 @@ export const metadata: Metadata = {
     "граѓани",
     "локална самоуправа"
   ],
+  alternates: {
+    canonical: "/"
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true
+    }
+  },
+  openGraph: {
+    title,
+    description,
+    type: "website",
+    locale: "mk_MK",
+    siteName: "Совет на Општина Кочани",
+    url: "/"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description
+  },
   icons: {
     icon: [
       {
@@ -30,24 +56,6 @@ export const metadata: Metadata = {
     ],
     shortcut: "/favicon.svg",
     apple: "/municipality-coat-placeholder.png"
-  },
-  openGraph: {
-    title: "Претседател на Советот на Општина Кочани",
-    description:
-      "Официјална веб-платформа за комуникација со претседателот на Советот на Општина Кочани.",
-    type: "website",
-    locale: "mk_MK",
-    siteName: "Совет на Општина Кочани"
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Претседател на Советот на Општина Кочани",
-    description:
-      "Поставете прашање, доставете предлог или пријавете проблем од јавен интерес."
-  },
-  robots: {
-    index: true,
-    follow: true
   }
 };
 
