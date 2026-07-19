@@ -4,8 +4,36 @@ import { Building2, ExternalLink, FileCheck2, Landmark, MapPin, MessageCircle, U
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { PublicSubmissionTabs } from "@/components/forms/PublicSubmissionTabs";
+import { absoluteUrl, siteConfig } from "@/lib/site";
 
 const googleMapsUrl = "https://maps.app.goo.gl/GSEFDyvddZVWMaj29";
+
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: siteConfig.title,
+    url: absoluteUrl("/"),
+    inLanguage: siteConfig.language,
+    description: siteConfig.description,
+    publisher: {
+      "@type": "GovernmentOrganization",
+      name: siteConfig.publisher
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: siteConfig.name,
+    jobTitle: "Претседател на Советот на Општина Кочани",
+    url: absoluteUrl("/"),
+    image: absoluteUrl("/president-placeholder.jpg"),
+    worksFor: {
+      "@type": "GovernmentOrganization",
+      name: siteConfig.publisher
+    }
+  }
+];
 
 const competences = [
   {
@@ -33,6 +61,12 @@ const competences = [
 export default function Home() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c")
+        }}
+      />
       <Header />
       <main>
         <section id="pocetna" className="relative isolate overflow-hidden bg-white scroll-mt-28">
@@ -45,11 +79,11 @@ export default function Home() {
                 Совет на Општина Кочани
               </p>
               <h1 className="mt-5 max-w-4xl text-4xl font-semibold leading-tight text-municipal-dark sm:text-5xl lg:text-6xl">
-                Претседател на Советот на Општина Кочани
+                Александар Андов
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-municipal-muted sm:text-xl">
-                Официјален и достапен простор за прашања, иницијативи и пријави од граѓаните,
-                со јасна и одговорна комуникација.
+                Претседател на Советот на Општина Кочани. Официјален и достапен простор
+                за прашања, иницијативи и пријави од граѓаните, со јасна и одговорна комуникација.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <Link href="#prasanje" className="primary-button">
@@ -83,7 +117,7 @@ export default function Home() {
               <div className="relative overflow-hidden rounded-lg border border-municipal-line bg-white p-2 shadow-official">
                 <Image
                   src="/president-placeholder.jpg"
-                  alt="Претседател на Советот на Општина Кочани"
+                  alt="Александар Андов, претседател на Советот на Општина Кочани"
                   width={945}
                   height={1600}
                   priority

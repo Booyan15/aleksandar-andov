@@ -1,28 +1,19 @@
 import type { Metadata } from "next";
+import { absoluteUrl, siteConfig, siteUrl } from "@/lib/site";
 import "./globals.css";
 
-const title = "Претседател на Советот на Општина Кочани";
-const description =
-  "Официјална веб-платформа за комуникација со претседателот на Советот на Општина Кочани. Поставете прашање, доставете предлог или пријавете проблем од јавен интерес.";
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://kocani.gov.mk";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: siteUrl,
   title: {
-    default: title,
-    template: "%s | Совет на Општина Кочани"
+    default: siteConfig.title,
+    template: siteConfig.titleTemplate
   },
-  description,
-  keywords: [
-    "Претседател на Советот на Општина Кочани",
-    "Совет на Општина Кочани",
-    "Општина Кочани",
-    "Кочани",
-    "постави прашање",
-    "пријави проблем",
-    "граѓани",
-    "локална самоуправа"
-  ],
+  description: siteConfig.description,
+  applicationName: siteConfig.applicationName,
+  authors: [{ name: siteConfig.author, url: absoluteUrl("/") }],
+  creator: siteConfig.creator,
+  publisher: siteConfig.publisher,
+  keywords: [...siteConfig.keywords],
   alternates: {
     canonical: "/"
   },
@@ -31,31 +22,50 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: {
       index: true,
-      follow: true
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1
     }
   },
   openGraph: {
-    title,
-    description,
+    title: siteConfig.title,
+    description: siteConfig.description,
     type: "website",
-    locale: "mk_MK",
-    siteName: "Совет на Општина Кочани",
-    url: "/"
+    locale: siteConfig.locale,
+    siteName: siteConfig.publisher,
+    url: "/",
+    images: [
+      {
+        url: siteConfig.socialImage.path,
+        width: siteConfig.socialImage.width,
+        height: siteConfig.socialImage.height,
+        alt: siteConfig.socialImage.alt
+      }
+    ]
   },
   twitter: {
     card: "summary_large_image",
-    title,
-    description
+    title: siteConfig.title,
+    description: siteConfig.description,
+    images: [siteConfig.socialImage.path]
   },
   icons: {
     icon: [
       {
-        url: "/favicon.svg",
-        type: "image/svg+xml"
+        url: "/icon.png",
+        sizes: "512x512",
+        type: "image/png"
       }
     ],
-    shortcut: "/favicon.svg",
-    apple: "/municipality-coat-placeholder.png"
+    shortcut: [{ url: "/icon.png", type: "image/png" }],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }]
+  },
+  category: "government",
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false
   }
 };
 
