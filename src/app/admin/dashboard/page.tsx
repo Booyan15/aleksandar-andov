@@ -3,6 +3,7 @@ import { SubmissionStatus, SubmissionType } from "@prisma/client";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { SubmissionDeleteButton } from "@/components/admin/SubmissionDeleteButton";
 import { SubmissionQuickEditForm } from "@/components/admin/SubmissionQuickEditForm";
+import { SubmissionSmsReplyLink } from "@/components/admin/SubmissionSmsReplyLink";
 import { formatDate, submissionStatusLabels, submissionTypeLabels } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
@@ -188,6 +189,7 @@ export default async function AdminDashboardPage({ searchParams }: DashboardProp
                         >
                           Отвори
                         </Link>
+                        <SubmissionSmsReplyLink submission={submission} />
                         <SubmissionDeleteButton id={submission.id} />
                       </div>
                     </td>
@@ -220,6 +222,7 @@ export default async function AdminDashboardPage({ searchParams }: DashboardProp
                     >
                       Отвори
                     </Link>
+                    <SubmissionSmsReplyLink submission={submission} />
                     <SubmissionDeleteButton id={submission.id} />
                   </div>
                 </div>
