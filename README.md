@@ -14,10 +14,13 @@ npm install
 
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST/neondb?sslmode=require&channel_binding=require"
+NEXT_PUBLIC_SITE_URL="http://localhost:3000"
 ADMIN_EMAIL="admin@kocani.gov.mk"
-ADMIN_PASSWORD="promeni-ja-ovaa-lozinka"
-SESSION_SECRET="promeni-ja-ovaa-sesija-so-dolga-slucajna-vrednost"
+ADMIN_PASSWORD_HASH="$2b$12$replace-with-a-bcrypt-hash"
+SESSION_SECRET="replace-with-at-least-32-random-characters"
 ```
+
+Администраторската лозинка се поставува како bcrypt hash, не како обичен текст. Генерирајте hash локално и поставете го само во Vercel environment variables.
 
 3. Подгответе ја PostgreSQL базата:
 

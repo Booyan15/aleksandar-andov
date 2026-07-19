@@ -6,6 +6,7 @@ import { SubmissionDeleteButton } from "@/components/admin/SubmissionDeleteButto
 import { SubmissionDetailForm } from "@/components/admin/SubmissionDetailForm";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { submissionIdSchema } from "@/lib/validation";
 
 type SubmissionDetailProps = {
   params: Promise<{
@@ -17,8 +18,14 @@ export default async function SubmissionDetailPage({ params }: SubmissionDetailP
   await requireAdmin();
 
   const { id } = await params;
+  const parsedId = submissionIdSchema.safeParse(id);
+
+  if (!parsedId.success) {
+    notFound();
+  }
+
   const submission = await prisma.submission.findUnique({
-    where: { id }
+    where: { id: parsedId.data }
   });
 
   if (!submission) {

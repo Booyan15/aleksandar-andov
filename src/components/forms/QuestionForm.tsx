@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { createQuestionSubmission, type PublicFormState, type PublicFormValues } from "@/app/actions";
+import { HONEYPOT_FIELD_NAME } from "@/lib/form-security";
 import { FormStatusMessage } from "./FormStatusMessage";
 import { SubmitButton } from "./SubmitButton";
 
@@ -117,11 +118,13 @@ export function QuestionForm() {
               id="question-phone"
               name="phone"
               type="tel"
-              className="field-input"
+              className={inputClass(Boolean(state.errors?.phone))}
               placeholder="Незадолжително"
               value={values.phone}
               onChange={(event) => setField("phone", event.target.value)}
+              aria-invalid={Boolean(state.errors?.phone)}
             />
+            {state.errors?.phone ? <p className="field-error">{state.errors.phone}</p> : null}
           </div>
         </div>
       </section>
@@ -164,6 +167,11 @@ export function QuestionForm() {
 
       <section className="space-y-5">
         <h4 className="form-group-title">Согласност и испраќање</h4>
+        <div className="hidden" aria-hidden="true">
+          <label htmlFor="question-website">Веб-страница</label>
+          <input id="question-website" name={HONEYPOT_FIELD_NAME} type="text" tabIndex={-1} autoComplete="off" />
+        </div>
+
         <div>
           <label
             className={`flex items-start gap-3 rounded-lg border bg-municipal-warm p-4 text-sm leading-6 text-municipal-text ${

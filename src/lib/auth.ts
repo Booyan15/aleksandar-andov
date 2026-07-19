@@ -1,9 +1,11 @@
 import crypto from "node:crypto";
+import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { SESSION_COOKIE_NAME } from "@/lib/session";
 
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 8;
+const MIN_SESSION_SECRET_LENGTH = 32;
 
 type SessionPayload = {
   email: string;
@@ -11,15 +13,19 @@ type SessionPayload = {
 };
 
 function getAdminEmail() {
-  return process.env.ADMIN_EMAIL?.trim();
+  return process.env.ADMIN_EMAIL?.trim().toLowerCase();
 }
 
-function getAdminPassword() {
-  return process.env.ADMIN_PASSWORD;
+function getAdminPasswordHash() {
+  return process.env.ADMIN_PASSWORD_HASH?.trim();
 }
 
 function getSessionSecret() {
-  return process.env.SESSION_SECRET || process.env.ADMIN_PASSWORD;
+  return process.env.SESSION_SECRET?.trim();
+}
+
+function sessionSecretIsStrong(secret: string | undefined) {
+  return Boolean(secret && secret.length >= MIN_SESSION_SECRET_LENGTH);
 }
 
 function encodePayload(payload: SessionPayload) {
@@ -37,8 +43,8 @@ function decodePayload(payload: string): SessionPayload | null {
 function sign(payload: string) {
   const secret = getSessionSecret();
 
-  if (!secret) {
-    throw new Error("Недостасува SESSION_SECRET или ADMIN_PASSWORD.");
+  if (!secret || !sessionSecretIsStrong(secret)) {
+    throw new Error("Недостасува валиден SESSION_SECRET.");
   }
 
   return crypto.createHmac("sha256", secret).update(payload).digest("base64url");
@@ -57,19 +63,30 @@ function verifySignature(payload: string, signature: string) {
 }
 
 export function adminEnvironmentIsConfigured() {
-  return Boolean(getAdminEmail() && getAdminPassword() && getSessionSecret());
+  return Boolean(getAdminEmail() && getAdminPasswordHash() && sessionSecretIsStrong(getSessionSecret()));
 }
 
-export function adminCredentialsAreValid(email: string, password: string) {
+export async function adminCredentialsAreValid(email: string, password: string) {
   const adminEmail = getAdminEmail();
-  const adminPassword = getAdminPassword();
+  const adminPasswordHash = getAdminPasswordHash();
 
-  return Boolean(adminEmail && adminPassword && email === adminEmail && password === adminPassword);
+  if (!adminEmail || !adminPasswordHash) {
+    return false;
+  }
+
+  try {
+    const emailMatches = email.trim().toLowerCase() === adminEmail;
+    const passwordMatches = await bcrypt.compare(password, adminPasswordHash);
+
+    return emailMatches && passwordMatches;
+  } catch {
+    return false;
+  }
 }
 
 export function createSessionToken(email: string) {
   const payload = encodePayload({
-    email,
+    email: email.trim().toLowerCase(),
     exp: Date.now() + SESSION_MAX_AGE_SECONDS * 1000
   });
 
@@ -108,7 +125,7 @@ export async function setAdminSession(email: string) {
 
   cookieStore.set(SESSION_COOKIE_NAME, createSessionToken(email), {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "strict",
     secure: process.env.NODE_ENV === "production",
     maxAge: SESSION_MAX_AGE_SECONDS,
     path: "/"
@@ -117,7 +134,13 @@ export async function setAdminSession(email: string) {
 
 export async function clearAdminSession() {
   const cookieStore = await cookies();
-  cookieStore.delete(SESSION_COOKIE_NAME);
+  cookieStore.set(SESSION_COOKIE_NAME, "", {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 0,
+    path: "/"
+  });
 }
 
 export async function getCurrentAdmin() {
